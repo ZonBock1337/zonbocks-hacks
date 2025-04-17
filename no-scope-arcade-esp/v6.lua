@@ -57,6 +57,16 @@ local function createBox(character, isTarget)
     local existing = espFolder:FindFirstChild(name .. "_ESP")
     if existing then existing:Destroy() end
 
+    local isPlayerChar = isPlayer(character)
+
+    -- Entscheide, ob wir für diesen Character eine Box zeichnen sollen
+    local shouldDraw =
+        (isPlayerChar and settings.player.hitboxes) or
+        (not isPlayerChar and settings.bot.hitboxes) or
+        isTarget
+
+    if not shouldDraw then return end
+
     local billboard = Instance.new("BillboardGui")
     billboard.Name = name .. "_ESP"
     billboard.Adornee = character.HumanoidRootPart
@@ -71,19 +81,13 @@ local function createBox(character, isTarget)
 
     if isTarget then
         frame.BackgroundColor3 = settings.focus_color
-    elseif isPlayer(character) and settings.player.hitboxes then
+    elseif isPlayerChar then
         frame.BackgroundColor3 = settings.player.hitbox_color
-    elseif not isPlayer(character) and settings.bot.hitboxes then
-        frame.BackgroundColor3 = settings.bot.hitbox_color
     else
-        billboard:Destroy()
-        return
+        frame.BackgroundColor3 = settings.bot.hitbox_color
     end
 
-    if not espVisible then
-        billboard.Enabled = false
-    end
-
+    billboard.Enabled = espVisible
     billboard.Parent = espFolder
 end
 
